@@ -33,7 +33,9 @@ VK_F1 = 0x70
 VK_NUMPAD0 = 0x60
 
 # Input flags
+INPUT_MOUSE = 0
 INPUT_KEYBOARD = 1
+INPUT_HARDWARE = 2
 KEYEVENTF_EXTENDEDKEY = 0x0001
 KEYEVENTF_KEYUP = 0x0002
 KEYEVENTF_SCANCODE = 0x0008
@@ -62,6 +64,17 @@ SW_RESTORE = 9
 ULONG_PTR = ctypes.c_size_t
 
 
+class MOUSEINPUT(ctypes.Structure):
+    _fields_ = [
+        ("dx", wintypes.LONG),
+        ("dy", wintypes.LONG),
+        ("mouseData", wintypes.DWORD),
+        ("dwFlags", wintypes.DWORD),
+        ("time", wintypes.DWORD),
+        ("dwExtraInfo", ULONG_PTR),
+    ]
+
+
 class KEYBDINPUT(ctypes.Structure):
     _fields_ = [
         ("wVk", wintypes.WORD),
@@ -72,13 +85,31 @@ class KEYBDINPUT(ctypes.Structure):
     ]
 
 
+class HARDWAREINPUT(ctypes.Structure):
+    _fields_ = [
+        ("uMsg", wintypes.DWORD),
+        ("wParamL", wintypes.WORD),
+        ("wParamH", wintypes.WORD),
+    ]
+
+
 class INPUT_UNION(ctypes.Union):
-    _fields_ = [("ki", KEYBDINPUT)]
+    # INPUT is a union of mouse, keyboard and hardware input. Even though
+    # VaPuClaimer only sends keyboard input, all three members must exist so
+    # ctypes.sizeof(INPUT) matches Win32's real INPUT structure.
+    _fields_ = [
+        ("mi", MOUSEINPUT),
+        ("ki", KEYBDINPUT),
+        ("hi", HARDWAREINPUT),
+    ]
 
 
 class INPUT(ctypes.Structure):
     _anonymous_ = ("u",)
-    _fields_ = [("type", wintypes.DWORD), ("u", INPUT_UNION)]
+    _fields_ = [
+        ("type", wintypes.DWORD),
+        ("u", INPUT_UNION),
+    ]
 
 
 @dataclass(frozen=True)
@@ -213,8 +244,18 @@ def _input_scan(scan: int, key_up: bool = False, extended: bool = False) -> INPU
 def _send(*items: INPUT) -> None:
     if not items:
         return
+
     arr = (INPUT * len(items))(*items)
-    user32.SendInput(len(items), arr, ctypes.sizeof(INPUT))
+    sent = user32.SendInput(len(items), arr, ctypes.sizeof(INPUT))
+
+    if sent != len(items):
+        error = ctypes.get_last_error()
+        if error:
+            raise ctypes.WinError(error)
+        raise OSError(
+            f"SendInput only sent {sent} of {len(items)} input events "
+            f"(INPUT size={ctypes.sizeof(INPUT)})."
+        )
 
 
 def tap_vk(vk: int) -> None:
@@ -256,7 +297,7 @@ def tap_ctrl_v() -> None:
     ctrl_scan = user32.MapVirtualKeyExW(VK_CONTROL, MAPVK_VK_TO_VSC, layout)
     v_scan = user32.MapVirtualKeyExW(ord("V"), MAPVK_VK_TO_VSC, layout)
     if not ctrl_scan or not v_scan:
-        return
+        raise OSError("Could not resolve Ctrl+V scan codes for the active keyboard layout.")
 
     send_scan(ctrl_scan, False)
     time.sleep(0.002)
@@ -369,6 +410,7 @@ def set_clipboard_text(text: str) -> bool:
                 if not user32.SetClipboardData(CF_UNICODETEXT, handle):
                     kernel32.GlobalFree(handle)
                     return False
+
                 # Ownership transfers to the OS on success.
                 return True
             finally:
@@ -401,20 +443,27 @@ class HotkeyManager:
                 while True:
                     cmd = self.commands.get_nowait()
                     action = cmd[0]
+
                     if action == "set":
                         _, hotkey_id, mods, vk, enabled, done, result = cmd
+
                         if hotkey_id in self._registered:
                             user32.UnregisterHotKey(None, hotkey_id)
                             self._registered.pop(hotkey_id, None)
+
                         ok = True
+
                         if enabled:
                             ok = bool(user32.RegisterHotKey(None, hotkey_id, mods, vk))
                             if ok:
                                 self._registered[hotkey_id] = (mods, vk)
+
                         result.append(ok)
                         done.set()
+
                     elif action == "probe":
                         _, hotkey_id, mods, vk, done, result = cmd
+
                         if hotkey_id in self._registered:
                             result.append(True)
                         else:
@@ -422,7 +471,9 @@ class HotkeyManager:
                             if ok:
                                 user32.UnregisterHotKey(None, hotkey_id)
                             result.append(ok)
+
                         done.set()
+
             except queue.Empty:
                 pass
 
