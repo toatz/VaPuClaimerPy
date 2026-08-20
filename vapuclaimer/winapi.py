@@ -49,6 +49,15 @@ MOD_NOREPEAT = 0x4000
 CF_UNICODETEXT = 13
 GMEM_MOVEABLE = 0x0002
 
+# Window styles. A tk window with overrideredirect(True) is a plain popup, and
+# Windows gives popups no taskbar button and no Alt+Tab entry, so the app has to
+# ask for one itself.
+GWL_EXSTYLE = -20
+WS_EX_TOOLWINDOW = 0x00000080
+WS_EX_APPWINDOW = 0x00040000
+SW_MINIMIZE = 6
+SW_RESTORE = 9
+
 
 ULONG_PTR = ctypes.c_size_t
 
@@ -146,6 +155,20 @@ user32.SetClipboardData.argtypes = [wintypes.UINT, wintypes.HANDLE]
 user32.SetClipboardData.restype = wintypes.HANDLE
 user32.GetClipboardSequenceNumber.restype = wintypes.DWORD
 
+user32.GetParent.argtypes = [wintypes.HWND]
+user32.GetParent.restype = wintypes.HWND
+user32.ShowWindow.argtypes = [wintypes.HWND, ctypes.c_int]
+user32.ShowWindow.restype = wintypes.BOOL
+
+# GetWindowLongPtrW only exists in the 64-bit user32; the 32-bit build keeps the
+# old name. Both return the same thing for GWL_EXSTYLE.
+_get_window_long = getattr(user32, "GetWindowLongPtrW", None) or user32.GetWindowLongW
+_set_window_long = getattr(user32, "SetWindowLongPtrW", None) or user32.SetWindowLongW
+_get_window_long.argtypes = [wintypes.HWND, ctypes.c_int]
+_get_window_long.restype = ctypes.c_ssize_t
+_set_window_long.argtypes = [wintypes.HWND, ctypes.c_int, ctypes.c_ssize_t]
+_set_window_long.restype = ctypes.c_ssize_t
+
 kernel32.GlobalAlloc.argtypes = [wintypes.UINT, ctypes.c_size_t]
 kernel32.GlobalAlloc.restype = wintypes.HGLOBAL
 kernel32.GlobalLock.argtypes = [wintypes.HGLOBAL]
@@ -242,6 +265,40 @@ def tap_ctrl_v() -> None:
     send_scan(v_scan, True)
     time.sleep(0.002)
     send_scan(ctrl_scan, True)
+
+
+def toplevel_hwnd(tk_window_id: int) -> int:
+    """The real top level window behind a tk window id.
+
+    Tk hands out the handle of its own frame, which on Windows sits inside a
+    wrapper window. The wrapper is the one the shell knows about, so styles have
+    to be set there.
+    """
+    parent = user32.GetParent(tk_window_id)
+    return int(parent) if parent else int(tk_window_id)
+
+
+def show_in_taskbar(hwnd: int) -> bool:
+    """Gives a borderless window a taskbar button and an Alt+Tab entry."""
+    if not hwnd:
+        return False
+
+    style = _get_window_long(hwnd, GWL_EXSTYLE)
+    wanted = (style & ~WS_EX_TOOLWINDOW) | WS_EX_APPWINDOW
+    if style == wanted:
+        return True
+
+    _set_window_long(hwnd, GWL_EXSTYLE, wanted)
+    return _get_window_long(hwnd, GWL_EXSTYLE) == wanted
+
+
+def minimize_window(hwnd: int) -> None:
+    # ShowWindow rather than tk's iconify(): iconify on an overrideredirect
+    # window does not minimise reliably, and the old workaround of turning
+    # overrideredirect off first flashed a native title bar and could leave the
+    # window unreachable.
+    if hwnd:
+        user32.ShowWindow(hwnd, SW_MINIMIZE)
 
 
 def foreground_info() -> tuple[int, str, str]:

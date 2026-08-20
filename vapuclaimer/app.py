@@ -79,11 +79,14 @@ class VaPuClaimerApp:
 
         self._drag_x = 0
         self._drag_y = 0
+        self._hwnd = 0
         self._build_styles()
         self._build_ui()
         self._load_settings_into_ui()
         self._center_window()
 
+        # The window has to exist before it has a handle to restyle.
+        self.root.after(10, self._claim_taskbar_button)
         self.root.after(20, self._process_hotkey_events)
         self.root.after(50, self._process_worker_events)
         self.root.after(200, self._poll_scope)
@@ -295,13 +298,27 @@ class VaPuClaimerApp:
     def _drag_move(self, event) -> None:
         self.root.geometry(f"+{event.x_root - self._drag_x}+{event.y_root - self._drag_y}")
 
-    def _minimize(self) -> None:
-        self.root.overrideredirect(False)
-        self.root.iconify()
-        self.root.bind("<Map>", self._restore_borderless, add="+")
+    def _claim_taskbar_button(self) -> None:
+        """Puts the borderless window on the taskbar and in Alt+Tab.
 
-    def _restore_borderless(self, _event=None) -> None:
-        self.root.after(20, lambda: self.root.overrideredirect(True))
+        overrideredirect(True) makes this a popup, and Windows gives popups
+        neither. Without a button there is no way back to a window that ends up
+        minimised or behind the game, and the app looks like it did not start
+        while the process keeps running.
+
+        The style has to be set while the window is hidden, or the shell does not
+        pick the change up.
+        """
+        self._hwnd = winapi.toplevel_hwnd(self.root.winfo_id())
+        if not self._hwnd:
+            return
+
+        self.root.withdraw()
+        winapi.show_in_taskbar(self._hwnd)
+        self.root.after(10, self.root.deiconify)
+
+    def _minimize(self) -> None:
+        winapi.minimize_window(self._hwnd or winapi.toplevel_hwnd(self.root.winfo_id()))
 
     # ---------- selections ----------
 
