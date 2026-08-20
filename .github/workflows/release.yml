@@ -1,0 +1,92 @@
+name: Release VaPuClaimer Python
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, e.g. v0.1.0"
+        required: true
+        default: "v0.1.0"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Syntax check
+        run: python -m compileall -q VaPuClaimer.pyw vapuclaimer tests tools
+
+      - name: Validate vehicle data
+        run: python tools/validate_data.py
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Set release version
+        shell: pwsh
+        run: |
+          Set-Content -Path version.txt -Value "${{ inputs.version }}" -Encoding utf8
+
+      - name: Clean Python cache
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse -Directory -Filter __pycache__ | Remove-Item -Recurse -Force
+          Get-ChildItem -Recurse -File -Include *.pyc,*.pyo | Remove-Item -Force
+
+      - name: Package source release
+        shell: pwsh
+        run: |
+          $version = "${{ inputs.version }}"
+          $name = "VaPuClaimer-Python-$version"
+
+          New-Item -ItemType Directory -Force "dist\$name" | Out-Null
+
+          Copy-Item VaPuClaimer.pyw "dist\$name\"
+          Copy-Item run.bat "dist\$name\"
+          Copy-Item version.txt "dist\$name\"
+          Copy-Item vapu-vehicles.source.json "dist\$name\"
+          Copy-Item settings.ini.example "dist\$name\"
+          Copy-Item README.md "dist\$name\"
+          Copy-Item CHANGELOG.md "dist\$name\"
+          Copy-Item vapuclaimer "dist\$name\vapuclaimer" -Recurse
+
+          Compress-Archive `
+            -Path "dist\$name\*" `
+            -DestinationPath "dist\$name.zip" `
+            -Force
+
+          $hash = (Get-FileHash "dist\$name.zip" -Algorithm SHA256).Hash.ToLower()
+          "$hash  $name.zip" | Set-Content "dist\$name.zip.sha256" -Encoding ascii
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: VaPuClaimer-Python-${{ inputs.version }}
+          path: |
+            dist/VaPuClaimer-Python-${{ inputs.version }}.zip
+            dist/VaPuClaimer-Python-${{ inputs.version }}.zip.sha256
+
+      - name: Create GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = "${{ inputs.version }}"
+          $name = "VaPuClaimer-Python-$version"
+
+          gh release create "$version" `
+            "dist/$name.zip" `
+            "dist/$name.zip.sha256" `
+            --title "VaPuClaimer Python $version" `
+            --generate-notes
