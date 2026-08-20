@@ -1,0 +1,184 @@
+name: Check VaPuClaimer Python
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Validate Python project
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Syntax check
+        id: syntax
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          python -m compileall -q VaPuClaimer.pyw vapuclaimer tests tools 2>&1 |
+            Tee-Object -FilePath syntax.log
+          exit $LASTEXITCODE
+
+      - name: Validate vehicle data
+        id: vehicles
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          python tools/validate_data.py 2>&1 |
+            Tee-Object -FilePath vehicles.log
+          exit $LASTEXITCODE
+
+      - name: Unit tests
+        id: tests
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -v 2>&1 |
+            Tee-Object -FilePath tests.log
+          exit $LASTEXITCODE
+
+      - name: Comment PR result
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v8
+        env:
+          SYNTAX_STATUS: ${{ steps.syntax.outcome }}
+          VEHICLE_STATUS: ${{ steps.vehicles.outcome }}
+          TEST_STATUS: ${{ steps.tests.outcome }}
+        with:
+          script: |
+            const fs = require('fs');
+
+            const marker = '<!-- vapuclaimer-ci-result -->';
+
+            const checks = [
+              {
+                name: 'Syntax check',
+                status: process.env.SYNTAX_STATUS,
+                log: 'syntax.log'
+              },
+              {
+                name: 'Vehicle data',
+                status: process.env.VEHICLE_STATUS,
+                log: 'vehicles.log'
+              },
+              {
+                name: 'Unit tests',
+                status: process.env.TEST_STATUS,
+                log: 'tests.log'
+              }
+            ];
+
+            const icon = status => status === 'success' ? '✅' : '❌';
+            const passed = checks.every(check => check.status === 'success');
+
+            let body = `${marker}\n`;
+            body += `## ${passed ? '✅ VaPuClaimer checks passed' : '❌ VaPuClaimer checks failed'}\n\n`;
+
+            body += '| Check | Result |\n';
+            body += '|---|---|\n';
+
+            for (const check of checks) {
+              body += `| ${check.name} | ${icon(check.status)} ${check.status} |\n`;
+            }
+
+            if (!passed) {
+              body += '\n### Problems\n';
+
+              for (const check of checks) {
+                if (check.status === 'success') continue;
+
+                let log = 'No log output was captured.';
+
+                if (fs.existsSync(check.log)) {
+                  const lines = fs.readFileSync(check.log, 'utf8')
+                    .replace(/\r/g, '')
+                    .split('\n')
+                    .filter(Boolean);
+
+                  // Keep the PR comment readable and below GitHub's comment limit.
+                  log = lines.slice(-60).join('\n');
+
+                  if (log.length > 8000) {
+                    log = log.slice(-8000);
+                  }
+
+                  if (!log.trim()) {
+                    log = 'The check failed without producing log output.';
+                  }
+                }
+
+                body += `\n<details>\n`;
+                body += `<summary>❌ ${check.name}</summary>\n\n`;
+                body += '```text\n';
+                body += log;
+                body += '\n```\n';
+                body += `</details>\n`;
+              }
+            }
+
+            body += `\n[Open workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`;
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              {
+                owner,
+                repo,
+                issue_number,
+                per_page: 100
+              }
+            );
+
+            const previous = comments.find(
+              comment =>
+                comment.user?.type === 'Bot' &&
+                comment.body?.includes(marker)
+            );
+
+            if (previous) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: previous.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body
+              });
+            }
+
+      - name: Fail workflow if checks failed
+        if: always() && (
+          steps.syntax.outcome == 'failure' ||
+          steps.vehicles.outcome == 'failure' ||
+          steps.tests.outcome == 'failure'
+          )
+        shell: pwsh
+        run: |
+          Write-Error "One or more VaPuClaimer checks failed."
+          exit 1
