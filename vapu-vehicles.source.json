@@ -1,0 +1,980 @@
+{
+  "factions": {
+    "ADF": [
+      {
+        "unit": "ASLAV",
+        "type": "IFV"
+      },
+      {
+        "unit": "M1A1",
+        "type": "MBT"
+      },
+      {
+        "unit": "PMV M2 RWS",
+        "type": "Jeep"
+      },
+      {
+        "unit": "PMV Mag58x3",
+        "type": "Jeep"
+      },
+      {
+        "unit": "PMV Mag58",
+        "type": "Jeep"
+      },
+      {
+        "unit": "UH-60M",
+        "type": "Heli"
+      },
+      {
+        "unit": "MRH-90",
+        "type": "Heli"
+      },
+      {
+        "unit": "HX60",
+        "type": "Logi"
+      }
+    ],
+    "BAF": [
+      {
+        "unit": "FV432 M2",
+        "type": "APC"
+      },
+      {
+        "unit": "FV432 M2 RWS",
+        "type": "APC"
+      },
+      {
+        "unit": "FV432 L7A2 RWS",
+        "type": "APC"
+      },
+      {
+        "unit": "FV107",
+        "type": "Recon"
+      },
+      {
+        "unit": "FV510",
+        "type": "IFV"
+      },
+      {
+        "unit": "FV510 UA",
+        "type": "IFV"
+      },
+      {
+        "unit": "FV520 CTAS",
+        "type": "IFV"
+      },
+      {
+        "unit": "FV4034",
+        "type": "MBT"
+      },
+      {
+        "unit": "HX60",
+        "type": "Logi"
+      },
+      {
+        "unit": "LPPV L7A2x2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "LPPV M2 RWS",
+        "type": "Jeep"
+      },
+      {
+        "unit": "SA330",
+        "type": "Heli"
+      }
+    ],
+    "CAF": [
+      {
+        "unit": "M113A3 M2",
+        "type": "APC TLAV"
+      },
+      {
+        "unit": "M113A3 C6",
+        "type": "APC TLAV"
+      },
+      {
+        "unit": "M113A3 TLAV",
+        "type": "APC TLAV"
+      },
+      {
+        "unit": "M113A3 LOGI",
+        "type": "APC Logi"
+      },
+      {
+        "unit": "LAV-III M2 RWS",
+        "type": "APC"
+      },
+      {
+        "unit": "LAV-III C6 RWS",
+        "type": "APC"
+      },
+      {
+        "unit": "COYOTE",
+        "type": "Recon"
+      },
+      {
+        "unit": "TAPV",
+        "type": "Recon"
+      },
+      {
+        "unit": "LAV-6",
+        "type": "IFV"
+      },
+      {
+        "unit": "LEOPARD-2A6M",
+        "type": "MBT"
+      },
+      {
+        "unit": "MSVS",
+        "type": "Logi"
+      },
+      {
+        "unit": "LUVW LOGI",
+        "type": "Logi"
+      },
+      {
+        "unit": "LUVW M2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "LUVW C6",
+        "type": "Jeep"
+      },
+      {
+        "unit": "LUV-A1 LOGI",
+        "type": "Logi"
+      },
+      {
+        "unit": "CH-146",
+        "type": "Heli"
+      },
+      {
+        "unit": "CH-178",
+        "type": "Heli"
+      }
+    ],
+    "USA": [
+      {
+        "unit": "M1126 CROWS M240",
+        "type": "APC"
+      },
+      {
+        "unit": "M1126 CROWS M2",
+        "type": "APC"
+      },
+      {
+        "unit": "M113A3 M2",
+        "type": "APC"
+      },
+      {
+        "unit": "M113A3 MK19",
+        "type": "APC"
+      },
+      {
+        "unit": "M113A3 Logi",
+        "type": "APC"
+      },
+      {
+        "unit": "M1064A3 M121",
+        "type": "MORTAR"
+      },
+      {
+        "unit": "M-ATV TOW",
+        "type": "TOW"
+      },
+      {
+        "unit": "M-ATV MK19",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M-ATV M240",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M-ATV M2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M-ATV CROWS M240",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M-ATV CROWS M2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M2A3",
+        "type": "BRADLEY"
+      },
+      {
+        "unit": "M7A3",
+        "type": "BFIST"
+      },
+      {
+        "unit": "M1A2",
+        "type": "MBT"
+      },
+      {
+        "unit": "M1128 MGS",
+        "type": "MGS"
+      },
+      {
+        "unit": "M939",
+        "type": "Logi"
+      },
+      {
+        "unit": "UH-60M",
+        "type": "Heli"
+      }
+    ],
+    "USMC": [
+      {
+        "unit": "AAVP-7A1",
+        "type": "APC"
+      },
+      {
+        "unit": "AAVP-LOGI",
+        "type": "APC"
+      },
+      {
+        "unit": "M1151 MK19",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M1151 M2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M1151 CROWS M2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M1151 TOW",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M-ATV MK19",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M-ATV M2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M-ATV CROWS M2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M-ATV TOW",
+        "type": "Jeep"
+      },
+      {
+        "unit": "LAV-25",
+        "type": "IFV"
+      },
+      {
+        "unit": "M1A1",
+        "type": "MBT"
+      },
+      {
+        "unit": "M939",
+        "type": "Logi"
+      },
+      {
+        "unit": "UH-1Y",
+        "type": "Heli"
+      }
+    ],
+    "PLA": [
+      {
+        "unit": "ZSL10",
+        "type": "APC"
+      },
+      {
+        "unit": "ZSD05",
+        "type": "APC"
+      },
+      {
+        "unit": "ZSD05",
+        "type": "Logi"
+      },
+      {
+        "unit": "CSK131 QJY88",
+        "type": "Jeep M2"
+      },
+      {
+        "unit": "CSK131 QJY89",
+        "type": "Jeep"
+      },
+      {
+        "unit": "CSK131 QJY88 RWS",
+        "type": "Jeep M2"
+      },
+      {
+        "unit": "CSK131 HJ8",
+        "type": "TOW"
+      },
+      {
+        "unit": "ZBL08",
+        "type": "IFV"
+      },
+      {
+        "unit": "ZSD89II IFV",
+        "type": "IFV"
+      },
+      {
+        "unit": "ZSL92 IFV",
+        "type": "IFV"
+      },
+      {
+        "unit": "ZBD05",
+        "type": "IFV"
+      },
+      {
+        "unit": "ZBD04A",
+        "type": "IFV"
+      },
+      {
+        "unit": "ZTD05",
+        "type": "MGS"
+      },
+      {
+        "unit": "ZTZ99A",
+        "type": "MBT"
+      },
+      {
+        "unit": "CTM131",
+        "type": "Logi"
+      },
+      {
+        "unit": "Z-8G",
+        "type": "Heli"
+      }
+    ],
+    "PLANMC": [
+      {
+        "unit": "ZSL10",
+        "type": "APC"
+      },
+      {
+        "unit": "ZSD05",
+        "type": "APC"
+      },
+      {
+        "unit": "ZSD05",
+        "type": "Logi"
+      },
+      {
+        "unit": "CSK131 QJY88",
+        "type": "Jeep M2"
+      },
+      {
+        "unit": "CSK131 QJY89",
+        "type": "Jeep"
+      },
+      {
+        "unit": "CSK131 QJY88 RWS",
+        "type": "Jeep M2"
+      },
+      {
+        "unit": "ZBL08",
+        "type": "IFV"
+      },
+      {
+        "unit": "ZBD05",
+        "type": "IFV"
+      },
+      {
+        "unit": "ZTD05",
+        "type": "MGS"
+      },
+      {
+        "unit": "ZTZ99A",
+        "type": "MBT"
+      },
+      {
+        "unit": "CTM131",
+        "type": "Logi"
+      },
+      {
+        "unit": "Z-8G",
+        "type": "Heli"
+      }
+    ],
+    "RGF": [
+      {
+        "unit": "MT-LBM 6MA",
+        "type": "APC"
+      },
+      {
+        "unit": "MT-LB PKT",
+        "type": "APC"
+      },
+      {
+        "unit": "MT-LB VMK",
+        "type": "APC"
+      },
+      {
+        "unit": "MT-LB LOGI",
+        "type": "Logi"
+      },
+      {
+        "unit": "TIGR-M KORD",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TIGR-M RWS KORD",
+        "type": "Jeep"
+      },
+      {
+        "unit": "BRDM-2",
+        "type": "Recon"
+      },
+      {
+        "unit": "BRDM-2 SPANDREL",
+        "type": "Recon"
+      },
+      {
+        "unit": "BTR-82A",
+        "type": "APC"
+      },
+      {
+        "unit": "BTR-80",
+        "type": "APC"
+      },
+      {
+        "unit": "MT-LBM 6MB",
+        "type": "IFV"
+      },
+      {
+        "unit": "BMP-1AM",
+        "type": "IFV"
+      },
+      {
+        "unit": "BMP-2",
+        "type": "IFV"
+      },
+      {
+        "unit": "BMP-2M",
+        "type": "IFV"
+      },
+      {
+        "unit": "BMP-3M",
+        "type": "IFV"
+      },
+      {
+        "unit": "T-72B3",
+        "type": "MBT"
+      },
+      {
+        "unit": "T-90A",
+        "type": "MBT"
+      },
+      {
+        "unit": "URAL-5350",
+        "type": "Logi"
+      },
+      {
+        "unit": "MI-8",
+        "type": "Heli"
+      }
+    ],
+    "RAF": [
+      {
+        "unit": "BTR-DG",
+        "type": "Logi"
+      },
+      {
+        "unit": "BTR-ZD",
+        "type": "AA"
+      },
+      {
+        "unit": "BTR-MDM",
+        "type": "APC"
+      },
+      {
+        "unit": "BTR-D PKM",
+        "type": "APC"
+      },
+      {
+        "unit": "BTR-D KORD",
+        "type": "APC"
+      },
+      {
+        "unit": "TIGR-M KORD",
+        "type": "Jeep"
+      },
+      {
+        "unit": "BRDM-2",
+        "type": "Recon"
+      },
+      {
+        "unit": "BMD-1M",
+        "type": "IFV"
+      },
+      {
+        "unit": "BMD-4M",
+        "type": "IFV"
+      },
+      {
+        "unit": "T-72B3",
+        "type": "MBT"
+      },
+      {
+        "unit": "SPRUT-SDM1",
+        "type": "MGS"
+      },
+      {
+        "unit": "URAL-5350",
+        "type": "Logi"
+      },
+      {
+        "unit": "MI-8",
+        "type": "Heli"
+      }
+    ],
+    "MEA": [
+      {
+        "unit": "MT-LBM 6MA",
+        "type": "APC"
+      },
+      {
+        "unit": "SIMIR KOMET",
+        "type": "TOW"
+      },
+      {
+        "unit": "SIMIR KORD",
+        "type": "Jeep"
+      },
+      {
+        "unit": "SIMIR MG3",
+        "type": "Jeep"
+      },
+      {
+        "unit": "SIMIR LOGI",
+        "type": "Logi"
+      },
+      {
+        "unit": "BRDM-2",
+        "type": "Recon"
+      },
+      {
+        "unit": "BRDM-2 UB-32",
+        "type": "Recon"
+      },
+      {
+        "unit": "BRDM-2 SPANDREL",
+        "type": "Recon Tow"
+      },
+      {
+        "unit": "BMP-1",
+        "type": "IFV"
+      },
+      {
+        "unit": "BMP-2",
+        "type": "IFV"
+      },
+      {
+        "unit": "T-62",
+        "type": "MBT"
+      },
+      {
+        "unit": "T-72S",
+        "type": "MBT"
+      },
+      {
+        "unit": "URAL-4320",
+        "type": "Logi"
+      },
+      {
+        "unit": "MI-8",
+        "type": "Heli"
+      }
+    ],
+    "TLF": [
+      {
+        "unit": "ACV-15 MG3",
+        "type": "APC"
+      },
+      {
+        "unit": "ACV-15 M2HB",
+        "type": "APC"
+      },
+      {
+        "unit": "PARS-III MG3 RWS",
+        "type": "APC"
+      },
+      {
+        "unit": "PARS-III M2 RWS",
+        "type": "APC"
+      },
+      {
+        "unit": "PARS-III MK19 RWS",
+        "type": "APC"
+      },
+      {
+        "unit": "M113A2T M121",
+        "type": "MORTAR APC"
+      },
+      {
+        "unit": "COBRA-II MG3",
+        "type": "Jeep"
+      },
+      {
+        "unit": "COBRA-II MG3 RWS",
+        "type": "Jeep"
+      },
+      {
+        "unit": "COBRA-II H2HB",
+        "type": "Jeep"
+      },
+      {
+        "unit": "COBRA-II M2 RWS",
+        "type": "Jeep"
+      },
+      {
+        "unit": "ACV-15 25MM",
+        "type": "IFV"
+      },
+      {
+        "unit": "PARS-III 25MM",
+        "type": "IFV"
+      },
+      {
+        "unit": "M60T",
+        "type": "MBT"
+      },
+      {
+        "unit": "BMC",
+        "type": "Logi"
+      },
+      {
+        "unit": "M113A2",
+        "type": "Logi"
+      },
+      {
+        "unit": "UH-1Y",
+        "type": "Heli"
+      },
+      {
+        "unit": "UH-60M",
+        "type": "Heli"
+      }
+    ],
+    "IS": [
+      {
+        "unit": "Ural-375D ZU-23-2",
+        "type": "AA"
+      },
+      {
+        "unit": "MT-LB ZU-23-2",
+        "type": "AA"
+      },
+      {
+        "unit": "MT-LB PKT",
+        "type": "APC"
+      },
+      {
+        "unit": "BTR-80",
+        "type": "APC"
+      },
+      {
+        "unit": "BMP-1 ZU-23-2",
+        "type": "AA"
+      },
+      {
+        "unit": "TECHNICAL BMP-1",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL DSHK",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL ARMORED DSHK",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL M2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL SPG-9",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL ARMORED SPG-9",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL UB-32",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL ARMORED UB-32",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL ZU-23-2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL KORNET",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL LOGI",
+        "type": "Jeep"
+      },
+      {
+        "unit": "BRDM-2",
+        "type": "Recon"
+      },
+      {
+        "unit": "BMP-1",
+        "type": "IFV"
+      },
+      {
+        "unit": "T-62",
+        "type": "MBT"
+      },
+      {
+        "unit": "URAL-375D",
+        "type": "Logi"
+      }
+    ],
+    "IMF": [
+      {
+        "unit": "Ural-375D ZU-23-2",
+        "type": "AA"
+      },
+      {
+        "unit": "BM-21 GRAD",
+        "type": "Grad"
+      },
+      {
+        "unit": "BTR-80",
+        "type": "APC"
+      },
+      {
+        "unit": "BMP-1 ZU-23-2",
+        "type": "AA"
+      },
+      {
+        "unit": "MT-LB ZU-23-2",
+        "type": "AA"
+      },
+      {
+        "unit": "MT-LB VMK",
+        "type": "APC"
+      },
+      {
+        "unit": "TECHNICAL ZU-23-2",
+        "type": "Jeep AA"
+      },
+      {
+        "unit": "TECHNICAL UB-32",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL SPG-9",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL ARMORED SPG-9",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL KORNET",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL M2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL ARMORED M2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL DSHK",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL ARMORED DSHK",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL LOGI",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL ARMORED LOGI",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TIGR-M KORD",
+        "type": "Jeep"
+      },
+      {
+        "unit": "BRDM-2",
+        "type": "Recon"
+      },
+      {
+        "unit": "BMP-1",
+        "type": "IFV"
+      },
+      {
+        "unit": "BMP-2",
+        "type": "IFV"
+      },
+      {
+        "unit": "MT-LBM 6MB",
+        "type": "IFV"
+      },
+      {
+        "unit": "T-62",
+        "type": "MBT"
+      }
+    ],
+    "PMC": [
+      {
+        "unit": "M939",
+        "type": "Logi"
+      },
+      {
+        "unit": "M113A3 M2",
+        "type": "APC"
+      },
+      {
+        "unit": "M113A3 MSV",
+        "type": "APC"
+      },
+      {
+        "unit": "CPV ARMORED CAR M134",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL MORTAR",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL M2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL MINIGUN",
+        "type": "Jeep"
+      },
+      {
+        "unit": "TECHNICAL LOGI",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M1151 M2",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M1151 M240",
+        "type": "Jeep"
+      },
+      {
+        "unit": "M1151 TOW",
+        "type": "TOW"
+      },
+      {
+        "unit": "M1117",
+        "type": "Guardian"
+      },
+      {
+        "unit": "M60T",
+        "type": "MBT"
+      },
+      {
+        "unit": "LOACH SCOUT",
+        "type": "Heli"
+      },
+      {
+        "unit": "LOACH CAS",
+        "type": "Heli"
+      },
+      {
+        "unit": "RAVEN TRANSPORT",
+        "type": "Heli"
+      }
+    ],
+    "AFU": [
+      {
+        "unit": "BMP-1TS",
+        "type": "IFV"
+      },
+      {
+        "unit": "BMP-1",
+        "type": "IFV"
+      },
+      {
+        "unit": "BMP-2",
+        "type": "IFV"
+      },
+      {
+        "unit": "BTR-4",
+        "type": "IFV"
+      },
+      {
+        "unit": "T-64BM2",
+        "type": "MBT"
+      },
+      {
+        "unit": "BRDM-2L1",
+        "type": "Recon"
+      },
+      {
+        "unit": "MTLB-PKT",
+        "type": "APC"
+      },
+      {
+        "unit": "MTLB-ZU23",
+        "type": "AA"
+      },
+      {
+        "unit": "Kozak-2M1 NSV",
+        "type": "Jeep"
+      },
+      {
+        "unit": "Kozak-2M1 AGS-17",
+        "type": "Jeep"
+      },
+      {
+        "unit": "KrAZ-6322 BM-21 Grad",
+        "type": "GRAD"
+      },
+      {
+        "unit": "TECHNICAL KORNET",
+        "type": "Jeep"
+      },
+      {
+        "unit": "BM-21 Grad",
+        "type": "GRAD"
+      },
+      {
+        "unit": "MI-8",
+        "type": "Heli"
+      }
+    ],
+    "CUSTOM": [
+      {
+        "unit": "VAPU INF",
+        "type": "Vapu inf"
+      },
+      {
+        "unit": "PULTTIBOIS",
+        "type": "Vapu inf"
+      },
+      {
+        "unit": "LOGI HAB SUPP",
+        "type": "Logi"
+      }
+    ]
+  }
+}
