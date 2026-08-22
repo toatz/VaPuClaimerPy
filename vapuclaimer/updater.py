@@ -61,7 +61,7 @@ def running_mode() -> str:
 
 def expected_asset_names(tag: str, mode: str) -> tuple[str, str]:
     if mode == MODE_EXE:
-        asset = f"VaPuClaimer-Windows-{tag}.exe"
+        asset = "VaPuClaimer.exe"
     elif mode == MODE_PYTHON:
         asset = f"VaPuClaimer-Python-{tag}.zip"
     else:
@@ -399,54 +399,110 @@ def _launch_python_update(prepared: PreparedUpdate, install_dir: Path) -> None:
 _EXE_UPDATE_SCRIPT = r'''param(
     [Parameter(Mandatory=$true)][int]$ParentPid,
     [Parameter(Mandatory=$true)][string]$CurrentExe,
+    [Parameter(Mandatory=$true)][string]$TargetExe,
     [Parameter(Mandatory=$true)][string]$NewExe,
     [Parameter(Mandatory=$true)][string]$LogPath
 )
+
 $ErrorActionPreference = "Stop"
+
 function Log([string]$Message) {
     $Stamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
     Add-Content -LiteralPath $LogPath -Value "[$Stamp] $Message" -Encoding UTF8
 }
-$Backup = "$CurrentExe.old"
+
+Get-ChildItem Env: |
+    Where-Object { $_.Name -like "_PYI_*" } |
+    ForEach-Object { Remove-Item ("Env:" + $_.Name) -ErrorAction SilentlyContinue }
+
+$env:PYINSTALLER_RESET_ENVIRONMENT = "1"
+
+$Backup = "$TargetExe.old"
+$OldVersionedExe = $null
+
 try {
     Log "Waiting for VaPuClaimer PID $ParentPid"
     Wait-Process -Id $ParentPid -ErrorAction SilentlyContinue
-    Start-Sleep -Milliseconds 600
+    Start-Sleep -Milliseconds 700
 
     if (-not (Test-Path -LiteralPath $NewExe)) {
         throw "Downloaded EXE is missing: $NewExe"
+    }
+
+    if (
+        $CurrentExe -ne $TargetExe -and
+        (Test-Path -LiteralPath $CurrentExe)
+    ) {
+        $OldVersionedExe = $CurrentExe
+        Log "Migrating versioned EXE name to stable VaPuClaimer.exe"
     }
 
     if (Test-Path -LiteralPath $Backup) {
         Remove-Item -LiteralPath $Backup -Force
     }
 
-    Move-Item -LiteralPath $CurrentExe -Destination $Backup -Force
+    if (Test-Path -LiteralPath $TargetExe) {
+        Log "Backing up existing stable EXE"
+        Move-Item -LiteralPath $TargetExe -Destination $Backup -Force
+    }
+    elseif ($OldVersionedExe) {
+        Log "Backing up old versioned EXE"
+        Copy-Item -LiteralPath $OldVersionedExe -Destination $Backup -Force
+    }
 
     try {
-        Copy-Item -LiteralPath $NewExe -Destination $CurrentExe -Force
-        if (-not (Test-Path -LiteralPath $CurrentExe)) {
-            throw "New EXE was not installed."
+        Log "Installing new VaPuClaimer.exe"
+        Copy-Item -LiteralPath $NewExe -Destination $TargetExe -Force
+
+        if (-not (Test-Path -LiteralPath $TargetExe)) {
+            throw "New VaPuClaimer.exe was not installed."
         }
 
-        $Process = Start-Process -FilePath $CurrentExe -WorkingDirectory (Split-Path -Parent $CurrentExe) -PassThru
-        Start-Sleep -Seconds 2
+        Log "Restarting updated VaPuClaimer"
+        $Process = Start-Process `
+            -FilePath $TargetExe `
+            -WorkingDirectory (Split-Path -Parent $TargetExe) `
+            -PassThru
+
+        Start-Sleep -Seconds 3
 
         if ($Process.HasExited) {
             throw "Updated VaPuClaimer exited immediately with code $($Process.ExitCode)."
         }
 
         Log "Updated EXE started successfully"
+
+        if (
+            $OldVersionedExe -and
+            (Test-Path -LiteralPath $OldVersionedExe)
+        ) {
+            Remove-Item -LiteralPath $OldVersionedExe -Force -ErrorAction SilentlyContinue
+            Log "Removed old versioned EXE"
+        }
+
         Remove-Item -LiteralPath $Backup -Force -ErrorAction SilentlyContinue
     }
     catch {
         Log "Install/restart failed: $($_.Exception.Message)"
-        Remove-Item -LiteralPath $CurrentExe -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $TargetExe -Force -ErrorAction SilentlyContinue
 
         if (Test-Path -LiteralPath $Backup) {
-            Move-Item -LiteralPath $Backup -Destination $CurrentExe -Force
-            Start-Process -FilePath $CurrentExe -WorkingDirectory (Split-Path -Parent $CurrentExe)
+            if ($OldVersionedExe) {
+                Copy-Item -LiteralPath $Backup -Destination $OldVersionedExe -Force
+                Log "Rollback restored old versioned EXE"
+                Start-Process `
+                    -FilePath $OldVersionedExe `
+                    -WorkingDirectory (Split-Path -Parent $OldVersionedExe)
+            }
+            else {
+                Move-Item -LiteralPath $Backup -Destination $TargetExe -Force
+                Log "Rollback restored previous stable EXE"
+                Start-Process `
+                    -FilePath $TargetExe `
+                    -WorkingDirectory (Split-Path -Parent $TargetExe)
+            }
         }
+
         throw
     }
 }
@@ -457,12 +513,24 @@ catch {
 '''
 
 
+def _clean_pyinstaller_environment() -> dict[str, str]:
+    env = os.environ.copy()
+    for key in list(env):
+        if key.startswith("_PYI_"):
+            env.pop(key, None)
+    env["PYINSTALLER_RESET_ENVIRONMENT"] = "1"
+    return env
+
+
 def _launch_exe_update(prepared: PreparedUpdate, install_dir: Path) -> None:
     if running_mode() != MODE_EXE:
         raise UpdateError("EXE updater was requested from a non-frozen Python process.")
 
+    install_dir = install_dir.resolve()
     current_exe = Path(sys.executable).resolve()
-    update_dir = install_dir.resolve() / UPDATE_DIR_NAME
+    target_exe = install_dir / "VaPuClaimer.exe"
+
+    update_dir = install_dir / UPDATE_DIR_NAME
     update_dir.mkdir(parents=True, exist_ok=True)
 
     helper = update_dir / "apply_exe_update.ps1"
@@ -482,6 +550,7 @@ def _launch_exe_update(prepared: PreparedUpdate, install_dir: Path) -> None:
         "-File", str(helper),
         "-ParentPid", str(os.getpid()),
         "-CurrentExe", str(current_exe),
+        "-TargetExe", str(target_exe),
         "-NewExe", str(prepared.payload_path.resolve()),
         "-LogPath", str(log_path.resolve()),
     ]
@@ -489,9 +558,10 @@ def _launch_exe_update(prepared: PreparedUpdate, install_dir: Path) -> None:
     try:
         subprocess.Popen(
             args,
-            cwd=str(install_dir.resolve()),
+            cwd=str(install_dir),
             close_fds=True,
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            env=_clean_pyinstaller_environment(),
         )
     except OSError as exc:
         raise UpdateError(f"Could not start EXE update helper: {exc}") from exc
