@@ -37,9 +37,13 @@ class VehicleDatabaseTests(unittest.TestCase):
         rows = self.db.search("heli adf")
         self.assertEqual([v.unit for v in rows], ["MRH-90"])
 
-    def test_custom_name_option_is_appended(self):
+    def test_custom_name_option_is_appended_to_custom_faction(self):
         units = self.db.units_for(CUSTOM_FACTION, "Vapu inf")
         self.assertEqual(units[-1], CUSTOM_NAME_OPTION)
+
+    def test_custom_name_option_is_appended_to_normal_faction(self):
+        units = self.db.units_for("ADF", "IFV")
+        self.assertEqual(units, ["ASLAV", CUSTOM_NAME_OPTION])
 
     def test_settings_round_trip(self):
         path = self.root / "settings.ini"
