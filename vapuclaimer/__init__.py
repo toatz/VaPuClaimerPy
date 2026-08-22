@@ -1,1 +1,0 @@
-"""VaPuClaimer Python package."""

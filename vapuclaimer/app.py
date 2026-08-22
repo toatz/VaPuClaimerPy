@@ -19,18 +19,17 @@ from .model import (
 from . import winapi, updater
 
 
+# PyInstaller --onefile extracts bundled resources under sys._MEIPASS.
+# Runtime/user files stay next to the executable.
 if getattr(sys, "frozen", False):
-    # PyInstaller EXE
     RESOURCE_DIR = Path(sys._MEIPASS)
     APP_DIR = Path(sys.executable).resolve().parent
 else:
-    # Normal Python / .pyw
     APP_DIR = Path(__file__).resolve().parent.parent
     RESOURCE_DIR = APP_DIR
 
 VEHICLE_FILE = RESOURCE_DIR / "vapu-vehicles.source.json"
 VERSION_FILE = RESOURCE_DIR / "version.txt"
-
 SETTINGS_FILE = APP_DIR / "settings.ini"
 
 HOTKEY_START = 2001
