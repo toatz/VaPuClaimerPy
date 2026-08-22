@@ -52,8 +52,11 @@ class VehicleDatabase:
             for v in self.vehicles
             if v.faction == faction and v.type == vehicle_type and v.unit
         )
-        if faction == CUSTOM_FACTION:
+
+        # Allow an arbitrary squad name under every faction/type combination.
+        if CUSTOM_NAME_OPTION not in out:
             out.append(CUSTOM_NAME_OPTION)
+
         return out
 
     def search(self, query: str, limit: int = 50) -> list[Vehicle]:

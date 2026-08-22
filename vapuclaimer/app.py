@@ -9,7 +9,6 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 from .model import (
-    CUSTOM_FACTION,
     CUSTOM_NAME_OPTION,
     Settings,
     Vehicle,
@@ -378,10 +377,14 @@ class VaPuClaimerApp:
         self._update_custom_visibility()
 
     def _update_custom_visibility(self) -> None:
-        custom = self.faction_var.get() == CUSTOM_FACTION and self.unit_var.get() == CUSTOM_NAME_OPTION
+        custom = self.unit_var.get() == CUSTOM_NAME_OPTION
+
         if custom:
-            self.custom_label.place()
-            self.custom_entry.place()
+            # place_forget() removes the previous placement information,
+            # so restore the widgets with their full geometry explicitly.
+            self.custom_label.place(x=12, y=192)
+            self.custom_entry.place(x=12, y=214, width=438, height=30)
+            self.custom_entry.focus_set()
         else:
             self.custom_label.place_forget()
             self.custom_entry.place_forget()
@@ -602,7 +605,7 @@ class VaPuClaimerApp:
     # ---------- claim ----------
 
     def _selected_unit(self) -> str:
-        if self.faction_var.get() == CUSTOM_FACTION and self.unit_var.get() == CUSTOM_NAME_OPTION:
+        if self.unit_var.get() == CUSTOM_NAME_OPTION:
             return self.custom_var.get().strip()
         return self.unit_var.get().strip()
 
