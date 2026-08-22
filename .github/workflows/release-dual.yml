@@ -75,15 +75,12 @@ jobs:
       - name: Build standalone Windows EXE
         shell: pwsh
         run: |
-          $version = "${{ inputs.version }}"
-          $exeName = "VaPuClaimer-Windows-$version"
-
           pyinstaller `
             --noconfirm `
             --clean `
             --onefile `
             --windowed `
-            --name "$exeName" `
+            --name "VaPuClaimer" `
             --add-data "vapu-vehicles.source.json;." `
             --add-data "version.txt;." `
             VaPuClaimer.pyw
@@ -91,16 +88,15 @@ jobs:
       - name: Create EXE checksum
         shell: pwsh
         run: |
-          $version = "${{ inputs.version }}"
-          $name = "VaPuClaimer-Windows-$version.exe"
-          $path = "dist\$name"
+          $path = "dist\VaPuClaimer.exe"
 
           if (-not (Test-Path $path)) {
             throw "Expected EXE was not created: $path"
           }
 
           $hash = (Get-FileHash $path -Algorithm SHA256).Hash.ToLower()
-          "$hash  $name" | Set-Content "dist\$name.sha256" -Encoding ascii
+          "$hash  VaPuClaimer.exe" |
+            Set-Content "dist\VaPuClaimer.exe.sha256" -Encoding ascii
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v6
@@ -109,8 +105,8 @@ jobs:
           path: |
             dist/VaPuClaimer-Python-${{ inputs.version }}.zip
             dist/VaPuClaimer-Python-${{ inputs.version }}.zip.sha256
-            dist/VaPuClaimer-Windows-${{ inputs.version }}.exe
-            dist/VaPuClaimer-Windows-${{ inputs.version }}.exe.sha256
+            dist/VaPuClaimer.exe
+            dist/VaPuClaimer.exe.sha256
 
       - name: Create GitHub Release
         shell: pwsh
@@ -122,7 +118,7 @@ jobs:
           gh release create "$version" `
             "dist/VaPuClaimer-Python-$version.zip" `
             "dist/VaPuClaimer-Python-$version.zip.sha256" `
-            "dist/VaPuClaimer-Windows-$version.exe" `
-            "dist/VaPuClaimer-Windows-$version.exe.sha256" `
+            "dist/VaPuClaimer.exe" `
+            "dist/VaPuClaimer.exe.sha256" `
             --title "VaPuClaimer $version" `
             --generate-notes
