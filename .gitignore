@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 settings.ini
+.update/
 dist/
 build/
 .vscode/
