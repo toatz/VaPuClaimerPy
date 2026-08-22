@@ -16,7 +16,7 @@ from .model import (
     VehicleDatabase,
     read_version,
 )
-from . import winapi
+from . import winapi, updater
 
 
 APP_DIR = Path(__file__).resolve().parent.parent
@@ -90,6 +90,15 @@ class VaPuClaimerApp:
         self.root.after(20, self._process_hotkey_events)
         self.root.after(50, self._process_worker_events)
         self.root.after(200, self._poll_scope)
+
+        # Check GitHub Releases in the background after the app has started.
+        # The updater preserves settings.ini, verifies the release SHA256,
+        # stages the update, applies it with a helper process and restarts.
+        self.auto_updater = updater.AutoUpdater(
+            self,
+            install_dir=APP_DIR,
+            current_version=self.version,
+        )
 
     # ---------- UI ----------
 
@@ -535,7 +544,11 @@ class VaPuClaimerApp:
             in_game, _ = self._foreground_is_game()
             self.scope_active = in_game
 
-            want_start = in_game and not self.claiming
+            want_start = (
+                in_game
+                and not self.claiming
+                and not getattr(self, "update_in_progress", False)
+            )
             want_stop = self.claiming
 
             if want_start != self.start_held:
@@ -554,6 +567,9 @@ class VaPuClaimerApp:
             if self.claiming:
                 state = "stop key armed"
                 color = self.OK
+            elif getattr(self, "update_in_progress", False):
+                state = "updating"
+                color = self.CYAN
             elif in_game and self.start_held:
                 state = "start key armed"
                 color = self.OK
@@ -591,6 +607,9 @@ class VaPuClaimerApp:
         return self.unit_var.get().strip()
 
     def _start_button(self) -> None:
+        if getattr(self, "update_in_progress", False):
+            return
+
         in_game, _ = self._foreground_is_game()
         if in_game:
             self.start_claim()
@@ -600,7 +619,7 @@ class VaPuClaimerApp:
             self.status_label.config(fg=self.CYAN)
 
     def start_claim(self) -> None:
-        if self.claiming:
+        if self.claiming or getattr(self, "update_in_progress", False):
             return
 
         unit = self._selected_unit()
