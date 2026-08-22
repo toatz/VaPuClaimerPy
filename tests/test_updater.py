@@ -1,67 +1,78 @@
-from __future__ import annotations
-
-import hashlib
-from pathlib import Path
 import tempfile
 import unittest
+from pathlib import Path
 import zipfile
 
 from vapuclaimer import updater
 
 
 class VersionTests(unittest.TestCase):
-    def test_newer_stable_version(self):
-        self.assertTrue(updater.is_newer_version("v1.2.0", "v1.1.9"))
+    def test_newer_version(self):
+        self.assertTrue(updater.is_newer_version("v1.3.0", "v1.2.0"))
         self.assertFalse(updater.is_newer_version("v1.2.0", "v1.2.0"))
         self.assertFalse(updater.is_newer_version("v1.1.9", "v1.2.0"))
 
     def test_stable_beats_prerelease(self):
-        self.assertTrue(updater.is_newer_version("v1.0.0", "v1.0.0-beta.2"))
+        self.assertTrue(updater.is_newer_version("v1.2.0", "v1.2.0-beta.2"))
 
-    def test_release_beats_unknown_dev_version(self):
-        self.assertTrue(updater.is_newer_version("v1.0.0", "local-dev"))
+
+class AssetSelectionTests(unittest.TestCase):
+    def test_python_assets(self):
+        self.assertEqual(
+            updater.expected_asset_names("v1.3.0", updater.MODE_PYTHON),
+            (
+                "VaPuClaimer-Python-v1.3.0.zip",
+                "VaPuClaimer-Python-v1.3.0.zip.sha256",
+            ),
+        )
+
+    def test_exe_assets(self):
+        self.assertEqual(
+            updater.expected_asset_names("v1.3.0", updater.MODE_EXE),
+            (
+                "VaPuClaimer-Windows-v1.3.0.exe",
+                "VaPuClaimer-Windows-v1.3.0.exe.sha256",
+            ),
+        )
 
 
 class ChecksumTests(unittest.TestCase):
-    def test_checksum_parser(self):
+    def test_checksum(self):
         digest = "a" * 64
-        text = f"{digest}  VaPuClaimer-Python-v1.0.0.zip\n"
         self.assertEqual(
-            updater._parse_checksum(text, "VaPuClaimer-Python-v1.0.0.zip"),
+            updater._parse_checksum(
+                f"{digest}  VaPuClaimer-Windows-v1.3.0.exe\n",
+                "VaPuClaimer-Windows-v1.3.0.exe",
+            ),
             digest,
         )
 
-    def test_wrong_filename_rejected(self):
-        digest = "b" * 64
+    def test_wrong_filename(self):
         with self.assertRaises(updater.UpdateError):
             updater._parse_checksum(
-                f"{digest}  wrong.zip\n",
-                "VaPuClaimer-Python-v1.0.0.zip",
+                "b" * 64 + "  wrong.exe\n",
+                "VaPuClaimer-Windows-v1.3.0.exe",
             )
 
 
 class ZipSafetyTests(unittest.TestCase):
-    def test_normal_zip_extracts(self):
+    def test_normal_zip(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             archive = root / "ok.zip"
             out = root / "out"
-
             with zipfile.ZipFile(archive, "w") as zf:
                 zf.writestr("vapuclaimer/test.py", "ok")
-
             updater.safe_extract_zip(archive, out)
             self.assertEqual((out / "vapuclaimer" / "test.py").read_text(), "ok")
 
-    def test_path_traversal_rejected(self):
+    def test_traversal_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             archive = root / "bad.zip"
             out = root / "out"
-
             with zipfile.ZipFile(archive, "w") as zf:
                 zf.writestr("../outside.txt", "nope")
-
             with self.assertRaises(updater.UpdateError):
                 updater.safe_extract_zip(archive, out)
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 import queue
 import threading
@@ -18,10 +19,18 @@ from .model import (
 from . import winapi, updater
 
 
-APP_DIR = Path(__file__).resolve().parent.parent
-VEHICLE_FILE = APP_DIR / "vapu-vehicles.source.json"
+# PyInstaller --onefile extracts bundled resources under sys._MEIPASS.
+# Runtime/user files stay next to the executable.
+if getattr(sys, "frozen", False):
+    RESOURCE_DIR = Path(sys._MEIPASS)
+    APP_DIR = Path(sys.executable).resolve().parent
+else:
+    APP_DIR = Path(__file__).resolve().parent.parent
+    RESOURCE_DIR = APP_DIR
+
+VEHICLE_FILE = RESOURCE_DIR / "vapu-vehicles.source.json"
+VERSION_FILE = RESOURCE_DIR / "version.txt"
 SETTINGS_FILE = APP_DIR / "settings.ini"
-VERSION_FILE = APP_DIR / "version.txt"
 
 HOTKEY_START = 2001
 HOTKEY_STOP = 2002
