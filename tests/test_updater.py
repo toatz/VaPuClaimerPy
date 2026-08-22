@@ -30,8 +30,8 @@ class AssetSelectionTests(unittest.TestCase):
         self.assertEqual(
             updater.expected_asset_names("v1.3.0", updater.MODE_EXE),
             (
-                "VaPuClaimer-Windows-v1.3.0.exe",
-                "VaPuClaimer-Windows-v1.3.0.exe.sha256",
+                "VaPuClaimer.exe",
+                "VaPuClaimer.exe.sha256",
             ),
         )
 
@@ -41,8 +41,8 @@ class ChecksumTests(unittest.TestCase):
         digest = "a" * 64
         self.assertEqual(
             updater._parse_checksum(
-                f"{digest}  VaPuClaimer-Windows-v1.3.0.exe\n",
-                "VaPuClaimer-Windows-v1.3.0.exe",
+                f"{digest}  VaPuClaimer.exe\n",
+                "VaPuClaimer.exe",
             ),
             digest,
         )
@@ -51,7 +51,7 @@ class ChecksumTests(unittest.TestCase):
         with self.assertRaises(updater.UpdateError):
             updater._parse_checksum(
                 "b" * 64 + "  wrong.exe\n",
-                "VaPuClaimer-Windows-v1.3.0.exe",
+                "VaPuClaimer.exe",
             )
 
 
@@ -75,6 +75,28 @@ class ZipSafetyTests(unittest.TestCase):
                 zf.writestr("../outside.txt", "nope")
             with self.assertRaises(updater.UpdateError):
                 updater.safe_extract_zip(archive, out)
+
+
+
+class PyInstallerEnvironmentTests(unittest.TestCase):
+    def test_clean_environment_removes_internal_pyi_vars(self):
+        import os
+        old = os.environ.get("_PYI_TEST_MARKER")
+        old_reset = os.environ.get("PYINSTALLER_RESET_ENVIRONMENT")
+        try:
+            os.environ["_PYI_TEST_MARKER"] = "old-parent"
+            env = updater._clean_pyinstaller_environment()
+            self.assertNotIn("_PYI_TEST_MARKER", env)
+            self.assertEqual(env["PYINSTALLER_RESET_ENVIRONMENT"], "1")
+        finally:
+            if old is None:
+                os.environ.pop("_PYI_TEST_MARKER", None)
+            else:
+                os.environ["_PYI_TEST_MARKER"] = old
+            if old_reset is None:
+                os.environ.pop("PYINSTALLER_RESET_ENVIRONMENT", None)
+            else:
+                os.environ["PYINSTALLER_RESET_ENVIRONMENT"] = old_reset
 
 
 if __name__ == "__main__":
